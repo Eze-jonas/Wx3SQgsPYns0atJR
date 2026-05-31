@@ -4,10 +4,18 @@
 console.log("🔥 DASHBOARD JS LOADED");
 
 function setText(id, value) {
+
     const el = document.getElementById(id);
-    if (el) el.innerText = value ?? 0;
+
+    if (el) {
+        el.innerText = value ?? 0;
+    }
 }
 
+
+// =========================
+// START
+// =========================
 window.startBot = async function () {
 
     console.log("🔥 START CLICKED");
@@ -33,7 +41,7 @@ window.startBot = async function () {
 
 
 // =========================
-// STOP BOT
+// STOP
 // =========================
 window.stopBot = async function () {
 
@@ -65,7 +73,9 @@ window.stopBot = async function () {
 const socket = new WebSocket("ws://127.0.0.1:8001/ws");
 
 socket.onopen = function () {
+
     console.log("🟢 WebSocket Connected");
+
 };
 
 
@@ -76,7 +86,7 @@ socket.onmessage = function (event) {
 
     const data = JSON.parse(event.data);
 
-    console.log("📡 LIVE DATA:", data)
+    console.log("📡 LIVE DATA:", data);
 
     // =========================
     // SAFE UI UPDATES
@@ -109,8 +119,14 @@ socket.onmessage = function (event) {
     setText("profit-factor", data.profit_factor);
     setText("exposure", data.exposure);
 
+    // =========================
+    // DEBUG
+    // =========================
     setText("momentum-value", data.momentum);
-    setText("signal-value", data.signal);
+
+    // REMOVED SIGNAL
+    // setText("signal-value", data.signal);
+
     setText("action-value", data.action ?? "HOLD");
 
 
@@ -158,7 +174,10 @@ socket.onmessage = function (event) {
             return `
                 <tr>
 
-                    <td style="color:${t.type === "BUY" ? "#00ff88" : "#ff4d4d"}; font-weight:bold;">
+                    <td style="
+                        color:${t.type === "BUY" ? "#00ff88" : "#ff4d4d"};
+                        font-weight:bold;
+                    ">
                         ${t.type}
                     </td>
 
@@ -166,7 +185,9 @@ socket.onmessage = function (event) {
 
                     <td>${qty}</td>
 
-                    <td style="color:${Number(t.pnl) >= 0 ? "#00ff88" : "#ff4d4d"};">
+                    <td style="
+                        color:${Number(t.pnl) >= 0 ? "#00ff88" : "#ff4d4d"};
+                    ">
                         ${pnl}
                     </td>
 
@@ -183,7 +204,9 @@ socket.onmessage = function (event) {
 // SOCKET CLOSE
 // =========================
 socket.onclose = function () {
+
     console.log("🔴 WebSocket Disconnected");
+
 };
 
 
@@ -191,5 +214,7 @@ socket.onclose = function () {
 // SOCKET ERROR
 // =========================
 socket.onerror = function (error) {
+
     console.error("❌ WebSocket Error:", error);
+
 };

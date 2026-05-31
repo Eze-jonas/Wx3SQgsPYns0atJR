@@ -4,8 +4,7 @@ import time
 
 from data.data_loader import load_initial_data
 from scripts.strategy.momentum import momentum
-from scripts.signals.signal import generate_signal
-from scripts.engine.engine_executor import execute_trade
+from scripts.engine.llm_engine_executor import execute_trade
 from scripts.analytics.system_analytics import compute_metrics
 from scripts.logger_utils.dedicated_logger import log_state
 from scripts.state.state import live_state
@@ -53,13 +52,13 @@ def process_candle(live_candle):
         # FEATURE ENGINEERING
         # =========================
         momentum_df = momentum(hd_df)
+        
 
         # =========================
         # SIGNAL GENERATION
         # =========================
-        signal_df = generate_signal(momentum_df)
-
-        latest_row = signal_df.iloc[-1]
+        latest_row = momentum_df.iloc[-1]
+        execute_trade(latest_row)
 
         # =========================
         # EXECUTE TRADE

@@ -127,11 +127,15 @@ async def websocket_endpoint(websocket: WebSocket):
                 **metrics,
 
                 # debug
+                 # debug
                 "momentum": debug.get("momentum", 0),
-                "signal": debug.get("signal", 0),
                 "action": debug.get("action", "HOLD"),
+
+                # curves
                 "equity_curve": live_state.get("equity_curve", []),
                 "drawdown_curve": live_state.get("drawdown_curve", []),
+
+                # trades
                 "trades": live_state.get("trades", []),
             }
             await websocket.send_json(payload)

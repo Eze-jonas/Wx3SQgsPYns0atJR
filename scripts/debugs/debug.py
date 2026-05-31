@@ -2,7 +2,6 @@ from scripts.state.state import live_state
 
 
 def update_debug(
-    signal: float,
     action: str,
     momentum: float
 ):
@@ -13,9 +12,6 @@ def update_debug(
     # =========================
     # SAFETY NORMALIZATION
     # =========================
-    if signal is None:
-        signal = -1
-
     if action is None:
         action = "HOLD"
 
@@ -26,7 +22,9 @@ def update_debug(
     # STORE DEBUG STATE
     # =========================
     live_state["latest_debug"] = {
-        "signal": float(signal),
+
         "action": action,
+
         "momentum": float(momentum)
+
     }

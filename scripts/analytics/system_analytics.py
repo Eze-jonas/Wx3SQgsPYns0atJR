@@ -2,21 +2,25 @@ import numpy as np
 import pandas as pd
 
 def compute_metrics(live_state):
-    
-    # SAFE DEFAULTS (IMPORTANT)
+
+    # SAFE DEFAULTS
     starting_capital = live_state.get("starting_capital", 0)
     invested = live_state.get("position_size", 0)
     cash = live_state.get("cash", 0)
     current_price = live_state.get("current_price", 0)
+
     print("METRICS PRICE:", current_price)
+
     entry_price = live_state.get("entry_price", 0)
     exit_price = live_state.get("exit_price", 0)
     btc_holdings = live_state.get("btc_holdings", 0)
+
     trades = live_state.get("trades", [])
     equity_curve = live_state.get("equity_curve", [])
+
     portfolio_value = cash + (btc_holdings * current_price)
 
-    # EARLY EXIT SAFETY (DO NOT BREAK FRONTEND)
+    # EARLY EXIT SAFETY
     if len(equity_curve) == 0:
         return {
             "starting_capital": starting_capital,
@@ -28,6 +32,7 @@ def compute_metrics(live_state):
             "exit_price": exit_price,
             "candle_count": live_state.get("candle_count", 0),
             "portfolio_value": round(portfolio_value, 2),
+
             "total_trades": 0,
             "wins": 0,
             "losses": 0,
@@ -39,8 +44,8 @@ def compute_metrics(live_state):
             "max_drawdown": 0,
             "cagr": 0,
             "exposure": 0,
+
             "momentum": 0,
-            "signal": 0,
             "action": "HOLD"
         }
 
@@ -64,14 +69,14 @@ def compute_metrics(live_state):
     profit_factor = gross_profit / gross_loss if gross_loss != 0 else 0
 
     equity = pd.Series(equity_curve)
-    portfolio_value = cash + btc_holdings * current_price
 
     returns = equity.pct_change().dropna()
 
     sharpe_ratio = (
         (returns.mean() / returns.std()) * np.sqrt(252)
         if len(returns) > 1 and returns.std() != 0
-        else 0)
+        else 0
+    )
 
     rolling_max = equity.cummax()
     drawdown = (equity - rolling_max) / rolling_max
@@ -88,9 +93,8 @@ def compute_metrics(live_state):
     cagr = (
         (end_value / start_value) ** (252 / n_periods) - 1
         if start_value > 0
-        else 0)
-
-    debug = live_state.get("latest_debug", {})
+        else 0
+    )
 
     return {
         "starting_capital": starting_capital,
@@ -99,9 +103,11 @@ def compute_metrics(live_state):
         "current_price": round(current_price, 2),
         "btc_holdings": round(btc_holdings, 6),
         "portfolio_value": round(portfolio_value, 2),
+
         "entry_price": round(entry_price, 2),
         "exit_price": round(exit_price, 2),
         "candle_count": live_state.get("candle_count", 0),
+
         "total_trades": total_trades,
         "wins": int(wins),
         "losses": int(losses),
@@ -109,11 +115,12 @@ def compute_metrics(live_state):
         "expectancy": round(expectancy, 2),
         "total_profit": round(total_profit, 2),
         "profit_factor": round(profit_factor, 2),
+
         "sharpe_ratio": round(sharpe_ratio, 2),
         "max_drawdown": round(max_drawdown * 100, 2),
         "cagr": round(cagr * 100, 2),
         "exposure": round(exposure * 100, 2),
-        "momentum": debug.get("momentum", 0),
-        "signal": debug.get("signal", 0),
-        "action": debug.get("action", "HOLD")
+
+        "momentum": live_state.get("latest_debug", {}).get("momentum", 0),
+        "action": live_state.get("latest_debug", {}).get("action", "HOLD")
     }

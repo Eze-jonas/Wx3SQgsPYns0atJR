@@ -16,10 +16,9 @@ live_state = {
     "current_price": 0.0,
 
     "runtime": "00:00:00",
+    "last_llm_decision": "HOLD",
 
-    "latest_debug": {
-        "momentum": 0,
-        "signal": 0,
-        "action": "HOLD"
-    }
+   "latest_debug": {
+    "momentum": 0,
+    "action": "HOLD"}
 }

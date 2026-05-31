@@ -24,7 +24,6 @@ def log_state(
     logger.info("========== DEBUG ==========")
 
     logger.info(f"Momentum: {debug_data['momentum']}")
-    logger.info(f"Signal: {debug_data['signal']}")
     logger.info(f"Action: {debug_data['action']}")
 
     # =========================
