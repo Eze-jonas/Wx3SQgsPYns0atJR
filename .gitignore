@@ -1,0 +1,16 @@
+__pycache__
+/bot.log
+bot.log.1
+data/__pycache__/
+notebook/
+runner.py
+scripts/analytics/__pycache__/
+scripts/debugs/__pycache__/
+scripts/engine/__pycache__/
+scripts/logger_utils/__pycache__/
+scripts/runtime/__pycache__/
+scripts/signals/__pycache__/
+scripts/state/__pycache__/
+scripts/strategy/__pycache__/
+scripts/system_pipeline/__pycache__/
+web_app/__pycache__/
