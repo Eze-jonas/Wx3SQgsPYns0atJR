@@ -2,6 +2,8 @@ import requests
 import json
 import re
 
+from scripts.prompt_config import system_prompt
+
 
 class LLMWrapper:
 
@@ -10,36 +12,18 @@ class LLMWrapper:
         self.url = "http://localhost:11434/api/chat"
 
     # =========================
-    # PROMPT
+    # DATA ONLY PROMPT
     # =========================
     def build_prompt(self, data):
 
         return f"""
-You are a deterministic trading engine.
-
-You are the ONLY decision maker.
-
-INPUT DATA:
-- momentum: {data.get("momentum")}
-- price: {data.get("price")}
-- position: {data.get("position")}
-
-RULES:
-- If momentum > 0 AND not in position → BUY
-- If momentum < 0 AND in position → SELL
-- Otherwise → HOLD
-
-IMPORTANT:
-- You MUST respect position state
-- You MUST NOT guess
-- You MUST return ONLY valid JSON
-
-OUTPUT FORMAT:
-{{"decision":"BUY|SELL|HOLD"}}
+momentum: {data.get("momentum")}
+price: {data.get("price")}
+position: {data.get("position")}
 """
 
     # =========================
-    # JSON PARSER (SAFE)
+    # SAFE JSON PARSER
     # =========================
     def extract_json(self, text):
         try:
@@ -54,13 +38,17 @@ OUTPUT FORMAT:
         return None
 
     # =========================
-    # MAIN DECISION CALL
+    # MAIN DECISION FUNCTION
     # =========================
     def get_decision(self, data):
 
         payload = {
             "model": self.model,
             "messages": [
+                {
+                    "role": "system",
+                    "content": system_prompt
+                },
                 {
                     "role": "user",
                     "content": self.build_prompt(data)

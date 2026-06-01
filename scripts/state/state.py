@@ -9,7 +9,7 @@ live_state = {
 
     "trades": [],
     "equity_curve": [],
-    "drawdown_curve": [],   # ✅ ADD THIS
+    "drawdown_curve": [],   
     "exposure_history": [],
 
     "highest_price": 0.0,
