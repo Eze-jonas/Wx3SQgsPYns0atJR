@@ -22,6 +22,11 @@ def execute_trade(row):
     # =========================
     # LLM ONLY DECISION
     # =========================
+    logger.info(
+        f"LLM INPUT | momentum={momentum} | price={price} | "
+        f"position={'LONG' if btc > 0 else 'NONE'}"
+    )
+
     llm_result = llm.get_decision({
         "momentum": momentum,
         "price": price,
@@ -34,6 +39,10 @@ def execute_trade(row):
 
     decision = llm_result["decision"]
 
+    logger.info(
+        f"LLM OUTPUT | decision={decision}"
+    )
+
     # =========================
     # UPDATE STATE
     # =========================
@@ -44,7 +53,7 @@ def execute_trade(row):
     update_debug(decision, momentum)
 
     # =========================
-    # BUY
+    # BUY (NO HARD BLOCKING)
     # =========================
     if decision == "BUY" and btc == 0:
 
@@ -68,13 +77,8 @@ def execute_trade(row):
                 "index": live_state["candle_count"]
             })
 
-            logger.info(
-                f"BUY | price={price:.2f} | qty={btc_qty:.6f}"
-            )
+            logger.info(f"BUY | price={price:.2f} | qty={btc_qty:.6f}")
 
-    # =========================
-    # SELL
-    # =========================
     elif decision == "SELL" and btc > 0:
 
         proceeds = btc * price
@@ -98,9 +102,6 @@ def execute_trade(row):
 
         logger.info(f"SELL | pnl={pnl:.2f}")
 
-    # =========================
-    # HOLD
-    # =========================
     else:
         live_state["last_action"] = "HOLD"
 
