@@ -44,68 +44,59 @@ def execute_trade(row):
     update_debug(decision, momentum)
 
     # =========================
-    # BUY (NO HARD BLOCKING)
+    # BUY
     # =========================
-    if decision == "BUY":
+    if decision == "BUY" and btc == 0:
 
-        # prevent accidental over-buying (soft guard only)
-        if btc == 0:
+        invest = min(live_state["position_size"], cash)
 
-            invest = min(live_state["position_size"], cash)
+        if invest > 0:
 
-            if invest > 0:
+            btc_qty = invest / price
 
-                btc_qty = invest / price
+            live_state["btc_holdings"] = btc_qty
+            live_state["cash"] -= invest
+            live_state["entry_price"] = price
+            live_state["highest_price"] = price
+            live_state["last_action"] = "BUY"
 
-                live_state["btc_holdings"] = btc_qty
-                live_state["cash"] -= invest
-                live_state["entry_price"] = price
-                live_state["highest_price"] = price
-                live_state["last_action"] = "BUY"
+            live_state["trades"].append({
+                "type": "BUY",
+                "price": price,
+                "qty": btc_qty,
+                "invest": invest,
+                "index": live_state["candle_count"]
+            })
 
-                live_state["trades"].append({
-                    "type": "BUY",
-                    "price": price,
-                    "qty": btc_qty,
-                    "invest": invest,
-                    "index": live_state["candle_count"]
-                })
-
-                logger.info(f"BUY | price={price:.2f} | qty={btc_qty:.6f}")
-
-        else:
-            live_state["last_action"] = "HOLD"
+            logger.info(
+                f"BUY | price={price:.2f} | qty={btc_qty:.6f}"
+            )
 
     # =========================
     # SELL
     # =========================
-    elif decision == "SELL":
+    elif decision == "SELL" and btc > 0:
 
-        if btc > 0:
+        proceeds = btc * price
+        entry_price = live_state.get("entry_price", price)
 
-            proceeds = btc * price
-            entry_price = live_state.get("entry_price", price)
+        pnl = (price - entry_price) * btc
 
-            pnl = (price - entry_price) * btc
+        live_state["cash"] += proceeds
+        live_state["btc_holdings"] = 0
+        live_state["exit_price"] = price
+        live_state["last_action"] = "SELL"
 
-            live_state["cash"] += proceeds
-            live_state["btc_holdings"] = 0
-            live_state["exit_price"] = price
-            live_state["last_action"] = "SELL"
+        live_state["trades"].append({
+            "type": "SELL",
+            "price": price,
+            "qty": btc,
+            "proceeds": proceeds,
+            "pnl": pnl,
+            "index": live_state["candle_count"]
+        })
 
-            live_state["trades"].append({
-                "type": "SELL",
-                "price": price,
-                "qty": btc,
-                "proceeds": proceeds,
-                "pnl": pnl,
-                "index": live_state["candle_count"]
-            })
-
-            logger.info(f"SELL | pnl={pnl:.2f}")
-
-        else:
-            live_state["last_action"] = "HOLD"
+        logger.info(f"SELL | pnl={pnl:.2f}")
 
     # =========================
     # HOLD
