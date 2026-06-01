@@ -2,7 +2,7 @@ import requests
 import json
 import re
 
-from scripts.prompt_config import system_prompt
+from scripts.prompt_config.prompt import system_prompt
 
 
 class LLMWrapper:
