@@ -1,10 +1,11 @@
+# scripts/engine/executor.py
+
 import logging
-import numpy as np
 from scripts.state.state import live_state
-from scripts.debugs.debug import update_debug
 from scripts.engine.llm_engine import LLMWrapper
 
 logger = logging.getLogger(__name__)
+
 llm = LLMWrapper(model="llama3.2")
 
 
@@ -20,87 +21,71 @@ def execute_trade(row):
     drawdown_curve = live_state.get("drawdown_curve", [])
 
     # =========================
-    # LLM ONLY DECISION
+    # UPDATE LIVE STATE (CRITICAL FIX)
     # =========================
-    logger.info(
-        f"LLM INPUT | momentum={momentum} | price={price} | "
-        f"position={'LONG' if btc > 0 else 'NONE'}"
-    )
+    live_state["momentum"] = momentum
+    live_state["current_price"] = price
 
-    llm_result = llm.get_decision({
+    # =========================
+    # LLM SIGNAL (ANALYST ROLE)
+    # =========================
+    signal = llm.get_signal({
         "momentum": momentum,
         "price": price,
         "position": "LONG" if btc > 0 else "NONE",
+    })["signal"]
 
-        # OPTIONAL CONTEXT (helps stability)
-        "equity": equity_curve[-1] if equity_curve else 0,
-        "drawdown": drawdown_curve[-1] if drawdown_curve else 0
-    })
+    logger.info(f"LLM SIGNAL | momentum={momentum} | signal={signal}")
 
-    decision = llm_result["decision"]
-
-    logger.info(
-        f"LLM OUTPUT | decision={decision}"
-    )
+    live_state["last_signal"] = signal
 
     # =========================
-    # UPDATE STATE
+    # PYTHON EXECUTION (TRADER ROLE)
     # =========================
-    live_state["current_price"] = price
-    live_state["last_llm_decision"] = decision
 
-    # DEBUG
-    update_debug(decision, momentum)
-
-    # =========================
-    # BUY (NO HARD BLOCKING)
-    # =========================
-    if decision == "BUY" and btc == 0:
+    # BUY RULE (EXECUTOR CONTROL)
+    if signal == "BUY" and btc == 0:
 
         invest = min(live_state["position_size"], cash)
 
         if invest > 0:
 
-            btc_qty = invest / price
+            qty = invest / price
 
-            live_state["btc_holdings"] = btc_qty
+            live_state["btc_holdings"] = qty
             live_state["cash"] -= invest
             live_state["entry_price"] = price
-            live_state["highest_price"] = price
-            live_state["last_action"] = "BUY"
 
             live_state["trades"].append({
                 "type": "BUY",
                 "price": price,
-                "qty": btc_qty,
-                "invest": invest,
+                "qty": qty,
                 "index": live_state["candle_count"]
             })
 
-            logger.info(f"BUY | price={price:.2f} | qty={btc_qty:.6f}")
+            logger.info(f"BUY EXECUTED | price={price} | qty={qty}")
 
-    elif decision == "SELL" and btc > 0:
+    # SELL RULE (EXECUTOR CONTROL)
+    elif signal == "SELL" and btc > 0:
 
         proceeds = btc * price
-        entry_price = live_state.get("entry_price", price)
+        entry = live_state.get("entry_price", price)
 
-        pnl = (price - entry_price) * btc
+        pnl = (price - entry) * btc
 
         live_state["cash"] += proceeds
         live_state["btc_holdings"] = 0
         live_state["exit_price"] = price
-        live_state["last_action"] = "SELL"
 
         live_state["trades"].append({
             "type": "SELL",
             "price": price,
             "qty": btc,
-            "proceeds": proceeds,
             "pnl": pnl,
             "index": live_state["candle_count"]
         })
 
-        logger.info(f"SELL | pnl={pnl:.2f}")
+        logger.info(f"SELL EXECUTED | pnl={pnl}")
 
     else:
         live_state["last_action"] = "HOLD"
@@ -111,25 +96,12 @@ def execute_trade(row):
     btc_value = live_state["btc_holdings"] * price
     equity = live_state["cash"] + btc_value
 
-    live_state["equity_curve"].append(float(equity))
+    live_state["equity_curve"].append(equity)
 
     # =========================
-    # SAFE DRAWDOWN CALC
+    # DRAWDOWN UPDATE
     # =========================
-    if len(live_state["equity_curve"]) > 0:
-        peak = max(live_state["equity_curve"])
-        drawdown = ((equity - peak) / peak) * 100 if peak > 0 else 0
-    else:
-        drawdown = 0
+    peak = max(live_state["equity_curve"])
+    drawdown = ((equity - peak) / peak) * 100 if peak > 0 else 0
 
-    live_state["drawdown_curve"].append(float(drawdown))
-
-    # =========================
-    # MEMORY LIMIT
-    # =========================
-    for key in ["equity_curve", "drawdown_curve"]:
-        if len(live_state[key]) > 500:
-            live_state[key] = live_state[key][-500:]
-
-    if len(live_state["trades"]) > 500:
-        live_state["trades"] = live_state["trades"][-500:]
+    live_state["drawdown_curve"].append(drawdown)

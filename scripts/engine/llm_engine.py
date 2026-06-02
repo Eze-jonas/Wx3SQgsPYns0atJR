@@ -11,20 +11,18 @@ class LLMWrapper:
         self.model = model
         self.url = "http://localhost:11434/api/chat"
 
-    # =========================
-    # DATA ONLY PROMPT
-    # =========================
     def build_prompt(self, data):
 
         return f"""
-momentum: {data.get("momentum")}
-price: {data.get("price")}
-position: {data.get("position")}
+INPUT:
+- momentum: {data.get("momentum")}
+- price: {data.get("price")}
+- position: {data.get("position")}
+
+Return ONLY JSON:
+{{"signal":"BUY|SELL|HOLD"}}
 """
 
-    # =========================
-    # SAFE JSON PARSER
-    # =========================
     def extract_json(self, text):
         try:
             return json.loads(text)
@@ -37,10 +35,7 @@ position: {data.get("position")}
                     pass
         return None
 
-    # =========================
-    # MAIN DECISION FUNCTION
-    # =========================
-    def get_decision(self, data):
+    def get_signal(self, data):
 
         payload = {
             "model": self.model,
@@ -61,20 +56,19 @@ position: {data.get("position")}
             response = requests.post(self.url, json=payload)
             response.raise_for_status()
 
-            result_text = response.json()["message"]["content"]
-
-            parsed = self.extract_json(result_text)
+            text = response.json()["message"]["content"]
+            parsed = self.extract_json(text)
 
             if not parsed:
-                return {"decision": "HOLD"}
+                return {"signal": "HOLD"}
 
-            decision = parsed.get("decision", "HOLD").upper()
+            signal = parsed.get("signal", "HOLD").upper()
 
-            if decision not in ["BUY", "SELL", "HOLD"]:
-                decision = "HOLD"
+            if signal not in ["BUY", "SELL", "HOLD"]:
+                signal = "HOLD"
 
-            return {"decision": decision}
+            return {"signal": signal}
 
         except Exception as e:
             print("LLM ERROR:", e)
-            return {"decision": "HOLD"}
+            return {"signal": "HOLD"}
