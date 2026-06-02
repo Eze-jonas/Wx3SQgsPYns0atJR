@@ -1,8 +1,8 @@
 import requests
 import json
-import re
 
 from scripts.prompt_config.prompt import system_prompt
+from scripts.momentum_classification.momentum_class import classify_momentum
 
 
 class LLMWrapper:
@@ -11,37 +11,57 @@ class LLMWrapper:
         self.model = model
         self.url = "http://localhost:11434/api/chat"
 
+    # -------------------------
+    # PROMPT BUILDER
+    # -------------------------
     def build_prompt(self, data):
 
         momentum = data.get("momentum", 0)
-        price = data.get("price", 0)
-        position = data.get("position", 0)
+        btc_holdings = data.get("btc_holdings", 0)
+
+        momentum_state = classify_momentum(momentum)
+
+        print(
+            f"MOMENTUM={momentum} | "
+            f"STATE={momentum_state} | "
+            f"HOLDINGS={btc_holdings}"
+        )
 
         return f"""
-INPUT:
-- momentum: {momentum}
-- price: {price}
-- position: {position}
-
-Return ONLY JSON:
-{{"signal":"BUY|SELL|HOLD"}}
+INPUT STATE:
+- btc_holdings: {btc_holdings}
+- momentum_state: {momentum_state}
 """
 
+    # -------------------------
+    # SAFE JSON PARSER
+    # -------------------------
     def extract_json(self, text):
         try:
             return json.loads(text)
         except:
-            match = re.search(r"\{.*\}", text, re.DOTALL)
-            if match:
+            start = text.find("{")
+            end = text.rfind("}")
+
+            if start != -1 and end != -1:
                 try:
-                    return json.loads(match.group())
+                    return json.loads(text[start:end + 1])
                 except:
                     pass
+
         return None
 
+    # -------------------------
+    # MAIN ENGINE
+    # -------------------------
     def get_signal(self, data):
 
         user_prompt = self.build_prompt(data)
+
+        print("\n" + "=" * 80)
+        print("USER PROMPT")
+        print("=" * 80)
+        print(user_prompt)
 
         payload = {
             "model": self.model,
@@ -63,17 +83,11 @@ Return ONLY JSON:
 
         try:
 
-            print("\n" + "=" * 80)
-            print("SYSTEM PROMPT")
-            print("=" * 80)
-            print(system_prompt)
+            response = requests.post(
+                self.url,
+                json=payload
+            )
 
-            print("\n" + "=" * 80)
-            print("USER PROMPT")
-            print("=" * 80)
-            print(user_prompt)
-
-            response = requests.post(self.url, json=payload)
             response.raise_for_status()
 
             text = response.json()["message"]["content"]
@@ -93,16 +107,29 @@ Return ONLY JSON:
             if not parsed:
                 return {"signal": "HOLD"}
 
-            signal = parsed.get("signal", "HOLD").upper()
+            signal = parsed.get(
+                "signal",
+                "HOLD"
+            ).upper()
 
-            if signal not in ["BUY", "SELL", "HOLD"]:
+            if signal not in [
+                "BUY",
+                "SELL",
+                "HOLD"
+            ]:
                 signal = "HOLD"
 
             print("\nFINAL SIGNAL:", signal)
             print("=" * 80 + "\n")
 
-            return {"signal": signal}
+            return {
+                "signal": signal
+            }
 
         except Exception as e:
+
             print("LLM ERROR:", e)
-            return {"signal": "HOLD"}
+
+            return {
+                "signal": "HOLD"
+            }

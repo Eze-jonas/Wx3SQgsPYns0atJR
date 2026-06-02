@@ -1,5 +1,6 @@
 import logging
 import numpy as np
+
 from scripts.state.state import live_state
 from scripts.debugs.debug import update_debug
 from scripts.engine.llm_engine import LLMWrapper
@@ -16,29 +17,23 @@ def execute_trade(row):
     # =========================
     # POSITION STATE (FLAT / LONG)
     # =========================
-    position = live_state["btc_holdings"]  # qty
-    is_flat = position == 0
-    is_long = position > 0
+    btc_holdings = live_state["btc_holdings"]
+
+    is_flat = btc_holdings == 0
+    is_long = btc_holdings > 0
 
     cash = live_state["cash"]
-
-    equity_curve = live_state.get("equity_curve", [])
-    drawdown_curve = live_state.get("drawdown_curve", [])
 
     # =========================
     # LLM INPUT
     # =========================
     logger.info(
-        f"LLM INPUT | momentum={momentum} | price={price} | position={position}"
+        f"LLM INPUT | momentum={momentum} | btc_holdings={btc_holdings}"
     )
 
     llm_result = llm.get_signal({
         "momentum": momentum,
-        "price": price,
-        "position": position,
-        "state": "FLAT" if is_flat else "LONG",
-        "equity": equity_curve[-1] if equity_curve else 0,
-        "drawdown": drawdown_curve[-1] if drawdown_curve else 0
+        "btc_holdings": btc_holdings
     })
 
     signal = llm_result["signal"]
@@ -52,6 +47,18 @@ def execute_trade(row):
     logger.info(f"LLM OUTPUT | signal={signal}")
 
     # =========================
+    # POSITION VALIDATION LAYER
+    # =========================
+
+    if is_flat and signal == "SELL":
+        logger.info("INVALID ACTION: SELL while FLAT → FORCED HOLD")
+        signal = "HOLD"
+
+    elif is_long and signal == "BUY":
+        logger.info("INVALID ACTION: BUY while LONG → FORCED HOLD")
+        signal = "HOLD"
+
+    # =========================
     # STATE UPDATE
     # =========================
     live_state["current_price"] = price
@@ -60,13 +67,14 @@ def execute_trade(row):
     update_debug(signal, momentum)
 
     # =========================
-    # EXECUTION LOGIC (FLAT / LONG)
-    # =========================
-
     # BUY ONLY WHEN FLAT
+    # =========================
     if signal == "BUY" and is_flat:
 
-        invest = min(live_state["position_size"], cash)
+        invest = min(
+            live_state["position_size"],
+            cash
+        )
 
         if invest > 0:
 
@@ -86,19 +94,32 @@ def execute_trade(row):
                 "index": live_state["candle_count"]
             })
 
-            logger.info(f"BUY | price={price:.2f} | qty={qty:.6f}")
+            logger.info(
+                f"BUY | price={price:.2f} | qty={qty:.6f}"
+            )
 
+    # =========================
     # SELL ONLY WHEN LONG
+    # =========================
     elif signal == "SELL" and is_long:
 
-        qty = position
-        proceeds = qty * price
-        entry_price = live_state.get("entry_price", price)
+        qty = btc_holdings
 
-        pnl = (price - entry_price) * qty
+        proceeds = qty * price
+
+        entry_price = live_state.get(
+            "entry_price",
+            price
+        )
+
+        pnl = (
+            (price - entry_price)
+            * qty
+        )
 
         live_state["cash"] += proceeds
         live_state["btc_holdings"] = 0
+
         live_state["exit_price"] = price
         live_state["last_action"] = "SELL"
 
@@ -111,7 +132,9 @@ def execute_trade(row):
             "index": live_state["candle_count"]
         })
 
-        logger.info(f"SELL | pnl={pnl:.2f}")
+        logger.info(
+            f"SELL | pnl={pnl:.2f}"
+        )
 
     else:
         live_state["last_action"] = "HOLD"
@@ -119,28 +142,56 @@ def execute_trade(row):
     # =========================
     # EQUITY UPDATE
     # =========================
-    btc_value = live_state["btc_holdings"] * price
-    equity = live_state["cash"] + btc_value
+    btc_value = (
+        live_state["btc_holdings"]
+        * price
+    )
 
-    live_state["equity_curve"].append(float(equity))
+    equity = (
+        live_state["cash"]
+        + btc_value
+    )
+
+    live_state["equity_curve"].append(
+        float(equity)
+    )
 
     # =========================
     # DRAWDOWN
     # =========================
     if len(live_state["equity_curve"]) > 0:
-        peak = max(live_state["equity_curve"])
-        drawdown = ((equity - peak) / peak) * 100 if peak > 0 else 0
+
+        peak = max(
+            live_state["equity_curve"]
+        )
+
+        drawdown = (
+            ((equity - peak) / peak) * 100
+            if peak > 0
+            else 0
+        )
+
     else:
         drawdown = 0
 
-    live_state["drawdown_curve"].append(float(drawdown))
+    live_state["drawdown_curve"].append(
+        float(drawdown)
+    )
 
     # =========================
     # MEMORY LIMIT
     # =========================
-    for key in ["equity_curve", "drawdown_curve"]:
+    for key in [
+        "equity_curve",
+        "drawdown_curve"
+    ]:
+
         if len(live_state[key]) > 500:
-            live_state[key] = live_state[key][-500:]
+            live_state[key] = (
+                live_state[key][-500:]
+            )
 
     if len(live_state["trades"]) > 500:
-        live_state["trades"] = live_state["trades"][-500:]
+        live_state["trades"] = (
+            live_state["trades"][-500:]
+        )
