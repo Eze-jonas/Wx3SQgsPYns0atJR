@@ -129,7 +129,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 # debug
                  # debug
                 "momentum": debug.get("momentum", 0),
-                "action": debug.get("action", "HOLD"),
+                "signal": debug.get("signal", "HOLD"),
 
                 # curves
                 "equity_curve": live_state.get("equity_curve", []),

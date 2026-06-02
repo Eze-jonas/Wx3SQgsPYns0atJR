@@ -86,7 +86,7 @@ socket.onmessage = function (event) {
 
     const data = JSON.parse(event.data);
 
-    #console.log("📡 LIVE DATA:", data);
+    // console.log("📡 LIVE DATA:", data);
 
     // =========================
     // SAFE UI UPDATES
@@ -127,7 +127,7 @@ socket.onmessage = function (event) {
     // REMOVED SIGNAL
     // setText("signal-value", data.signal);
 
-    setText("action-value", data.action ?? "HOLD");
+    setText("signal-value", data.signal ?? "HOLD");
 
 
     // =========================
@@ -139,7 +139,7 @@ socket.onmessage = function (event) {
 
     const trades = data.trades || [];
 
-    #console.log("📊 TRADES RECEIVED:", trades);
+    //console.log("📊 TRADES RECEIVED:", trades);
 
     if (trades.length === 0) {
 

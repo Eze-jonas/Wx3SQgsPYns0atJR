@@ -23,7 +23,7 @@ def update_debug(
     # =========================
     live_state["latest_debug"] = {
 
-        "action": action,
+        "signal": action,
 
         "momentum": float(momentum)
 

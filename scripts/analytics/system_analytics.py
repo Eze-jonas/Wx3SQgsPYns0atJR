@@ -122,5 +122,5 @@ def compute_metrics(live_state):
         "exposure": round(exposure * 100, 2),
 
         "momentum": live_state.get("latest_debug", {}).get("momentum", 0),
-        "action": live_state.get("latest_debug", {}).get("action", "HOLD")
+        "signal": live_state.get("latest_debug", {}).get("signal", "HOLD")
     }
