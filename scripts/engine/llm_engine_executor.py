@@ -1,11 +1,11 @@
 import logging
-import numpy as np
 
 from scripts.state.state import live_state
 from scripts.debugs.debug import update_debug
 from scripts.engine.llm_engine import LLMWrapper
 
 logger = logging.getLogger(__name__)
+
 llm = LLMWrapper(model="llama3.2")
 
 
@@ -15,7 +15,7 @@ def execute_trade(row):
     price = row["close"]
 
     # =========================
-    # POSITION STATE (FLAT / LONG)
+    # POSITION STATE
     # =========================
     btc_holdings = live_state["btc_holdings"]
 
@@ -28,34 +28,46 @@ def execute_trade(row):
     # LLM INPUT
     # =========================
     logger.info(
-        f"LLM INPUT | momentum={momentum} | btc_holdings={btc_holdings}"
+        f"LLM INPUT | momentum={momentum}"
     )
 
     llm_result = llm.get_signal({
-        "momentum": momentum,
-        "btc_holdings": btc_holdings
+        "momentum": momentum
     })
 
     signal = llm_result["signal"]
 
     # =========================
-    # SAFE GUARD ONLY
+    # SAFE GUARD
     # =========================
-    if signal not in ["BUY", "SELL", "HOLD"]:
+    if signal not in [
+        "BUY",
+        "SELL",
+        "HOLD"
+    ]:
         signal = "HOLD"
 
-    logger.info(f"LLM OUTPUT | signal={signal}")
+    logger.info(
+        f"LLM OUTPUT | signal={signal}"
+    )
 
     # =========================
-    # POSITION VALIDATION LAYER
+    # POSITION VALIDATION
     # =========================
-
     if is_flat and signal == "SELL":
-        logger.info("INVALID ACTION: SELL while FLAT → FORCED HOLD")
+
+        logger.info(
+            "INVALID ACTION: SELL while FLAT → FORCED HOLD"
+        )
+
         signal = "HOLD"
 
     elif is_long and signal == "BUY":
-        logger.info("INVALID ACTION: BUY while LONG → FORCED HOLD")
+
+        logger.info(
+            "INVALID ACTION: BUY while LONG → FORCED HOLD"
+        )
+
         signal = "HOLD"
 
     # =========================
@@ -64,10 +76,13 @@ def execute_trade(row):
     live_state["current_price"] = price
     live_state["last_llm_decision"] = signal
 
-    update_debug(signal, momentum)
+    update_debug(
+        signal,
+        momentum
+    )
 
     # =========================
-    # BUY ONLY WHEN FLAT
+    # BUY LOGIC
     # =========================
     if signal == "BUY" and is_flat:
 
@@ -82,6 +97,7 @@ def execute_trade(row):
 
             live_state["btc_holdings"] = qty
             live_state["cash"] -= invest
+
             live_state["entry_price"] = price
             live_state["highest_price"] = price
             live_state["last_action"] = "BUY"
@@ -99,7 +115,7 @@ def execute_trade(row):
             )
 
     # =========================
-    # SELL ONLY WHEN LONG
+    # SELL LOGIC
     # =========================
     elif signal == "SELL" and is_long:
 
@@ -136,7 +152,11 @@ def execute_trade(row):
             f"SELL | pnl={pnl:.2f}"
         )
 
+    # =========================
+    # HOLD
+    # =========================
     else:
+
         live_state["last_action"] = "HOLD"
 
     # =========================
@@ -157,9 +177,11 @@ def execute_trade(row):
     )
 
     # =========================
-    # DRAWDOWN
+    # DRAWDOWN UPDATE
     # =========================
-    if len(live_state["equity_curve"]) > 0:
+    if len(
+        live_state["equity_curve"]
+    ) > 0:
 
         peak = max(
             live_state["equity_curve"]
@@ -172,6 +194,7 @@ def execute_trade(row):
         )
 
     else:
+
         drawdown = 0
 
     live_state["drawdown_curve"].append(
@@ -186,12 +209,18 @@ def execute_trade(row):
         "drawdown_curve"
     ]:
 
-        if len(live_state[key]) > 500:
+        if len(
+            live_state[key]
+        ) > 500:
+
             live_state[key] = (
                 live_state[key][-500:]
             )
 
-    if len(live_state["trades"]) > 500:
+    if len(
+        live_state["trades"]
+    ) > 500:
+
         live_state["trades"] = (
             live_state["trades"][-500:]
         )

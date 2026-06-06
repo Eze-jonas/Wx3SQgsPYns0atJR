@@ -6,6 +6,8 @@ def momentum(hd_df):
     """
     momentum_df = hd_df.copy()
     
-    momentum_df["momentum"] = momentum_df["close"].pct_change()
+    momentum_df["momentum"] = (
+    momentum_df["close"].pct_change(periods=10) * 100
+)
     
     return momentum_df
