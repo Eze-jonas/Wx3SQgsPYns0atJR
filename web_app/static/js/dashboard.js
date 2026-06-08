@@ -123,10 +123,7 @@ socket.onmessage = function (event) {
     // DEBUG
     // =========================
     setText("momentum-value", data.momentum);
-
-    // REMOVED SIGNAL
-    // setText("signal-value", data.signal);
-
+    setText("sma-pct-value", data.sma_pct);
     setText("signal-value", data.signal ?? "HOLD");
 
 

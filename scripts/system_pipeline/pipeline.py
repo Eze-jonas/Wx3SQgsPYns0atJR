@@ -8,6 +8,7 @@ from scripts.engine.llm_engine_executor import execute_trade
 from scripts.analytics.system_analytics import compute_metrics
 from scripts.logger_utils.dedicated_logger import log_state
 from scripts.state.state import live_state
+from scripts.features.indicators import add_sma
 
 logger = logging.getLogger(__name__)
 
@@ -52,13 +53,19 @@ def process_candle(live_candle):
         # FEATURE ENGINEERING
         # =========================
         momentum_df = momentum(hd_df)
+        sma_df = add_sma(momentum_df)
         
 
         # =========================
         # SIGNAL GENERATION
         # =========================
-        latest_row = momentum_df.iloc[-1]
-        execute_trade(latest_row)
+        clean_df = sma_df.dropna()
+
+        if clean_df.empty:
+            return
+
+        latest_row = clean_df.iloc[-1]
+        
 
         # =========================
         # EXECUTE TRADE

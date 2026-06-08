@@ -26,13 +26,18 @@ class LLMWrapper:
     def get_signal(self, data):
 
         momentum = data.get("momentum", 0)
+        sma_pct = data.get("sma_pct", 0)
 
-        print(f"MOMENTUM={momentum}")
+        print(
+            f"MOMENTUM={momentum} | "
+            f"SMA_PCT={sma_pct}"
+            )
 
         try:
 
             response = self.chain.invoke({
-                "momentum": momentum
+                "momentum": momentum,
+                "sma_pct": sma_pct
             })
 
             signal = response.content.strip().upper()

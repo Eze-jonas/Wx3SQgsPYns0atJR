@@ -9,7 +9,7 @@ live_state = {
 
     "trades": [],
     "equity_curve": [],
-    "drawdown_curve": [],   
+    "drawdown_curve": [],
     "exposure_history": [],
 
     "highest_price": 0.0,
@@ -18,7 +18,9 @@ live_state = {
     "runtime": "00:00:00",
     "last_llm_decision": "HOLD",
 
-   "latest_debug": {
-    "momentum": 0,
-    "action": "HOLD"}
+    "latest_debug": {
+        "signal": "HOLD",
+        "momentum": 0.0,
+        "sma_pct": 0.0
+    }
 }

@@ -11,8 +11,15 @@ llm = LLMWrapper(model="llama3.2")
 
 def execute_trade(row):
 
-    momentum = row["momentum"]
-    price = row["close"]
+    if row is None:
+        return
+
+    price = row.get("close")
+    momentum = row.get("momentum")
+    sma_pct = row.get("sma_pct")
+
+    if price is None or price == 0:
+        return
 
     # =========================
     # POSITION STATE
@@ -28,11 +35,11 @@ def execute_trade(row):
     # LLM INPUT
     # =========================
     logger.info(
-        f"LLM INPUT | momentum={momentum}"
-    )
+        f"LLM INPUT | momentum={momentum} | sma_pct={sma_pct}")
 
     llm_result = llm.get_signal({
-        "momentum": momentum
+        "momentum": momentum,
+        "sma_pct": sma_pct
     })
 
     signal = llm_result["signal"]
@@ -57,7 +64,7 @@ def execute_trade(row):
     if is_flat and signal == "SELL":
 
         logger.info(
-            "INVALID ACTION: SELL while FLAT → FORCED HOLD"
+            "INVALID ACTION: SELL while FLAT -> FORCED HOLD"
         )
 
         signal = "HOLD"
@@ -65,7 +72,7 @@ def execute_trade(row):
     elif is_long and signal == "BUY":
 
         logger.info(
-            "INVALID ACTION: BUY while LONG → FORCED HOLD"
+            "INVALID ACTION: BUY while LONG -> FORCED HOLD"
         )
 
         signal = "HOLD"
@@ -78,7 +85,8 @@ def execute_trade(row):
 
     update_debug(
         signal,
-        momentum
+        momentum,
+        sma_pct
     )
 
     # =========================

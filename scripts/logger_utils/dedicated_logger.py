@@ -13,18 +13,18 @@ def log_state(
     # LIVE STATE
     # =========================
     logger.info("========== LIVE STATE ==========")
-
     logger.info(f"RUN TIME: {runtime_str}")
-    
+
     # =========================
     # DEBUG PANEL
     # =========================
-    debug_data = live_state["latest_debug"]
+    debug_data = live_state.get("latest_debug", {})
 
     logger.info("========== DEBUG ==========")
 
-    logger.info(f"Momentum: {debug_data['momentum']}")
-    logger.info(f"Signal: {debug_data['signal']}")
+    logger.info(f"Signal: {debug_data.get('signal', 'HOLD')}")
+    logger.info(f"Momentum: {debug_data.get('momentum', None)}")
+    logger.info(f"SMA %: {debug_data.get('sma_pct', None)}")
 
     # =========================
     # LIVE DASHBOARD
@@ -33,5 +33,3 @@ def log_state(
 
     for key, value in metrics.items():
         logger.info(f"{key}: {value}")
-
-   

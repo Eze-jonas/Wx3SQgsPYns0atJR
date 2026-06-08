@@ -3,10 +3,12 @@ import os
 import asyncio
 import logging
 from logging.handlers import RotatingFileHandler
+
 from fastapi import FastAPI, Request, WebSocket
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+
 from scripts.state.state import live_state
 from scripts.runtime.runtime_monitor import format_runtime
 from scripts.engine.engine_controler import (
@@ -15,20 +17,26 @@ from scripts.engine.engine_controler import (
     get_system_status
 )
 
+# =========================
 # FASTAPI APP
+# =========================
 app = FastAPI(title="BTC Trading Bot API")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 templates = Jinja2Templates(
-    directory=os.path.join(BASE_DIR, "templates"))
+    directory=os.path.join(BASE_DIR, "templates")
+)
 
 app.mount(
     "/static",
     StaticFiles(directory=os.path.join(BASE_DIR, "static")),
-    name="static")
+    name="static"
+)
 
+# =========================
 # LOGGING
+# =========================
 def setup_logger():
 
     logger = logging.getLogger()
@@ -38,7 +46,8 @@ def setup_logger():
         return logger
 
     formatter = logging.Formatter(
-        "%(asctime)s | %(levelname)s | %(message)s")
+        "%(asctime)s | %(levelname)s | %(message)s"
+    )
 
     console = logging.StreamHandler(sys.stdout)
     console.setFormatter(formatter)
@@ -46,26 +55,33 @@ def setup_logger():
     file = RotatingFileHandler(
         "bot.log",
         maxBytes=5_000_000,
-        backupCount=3)
-
+        backupCount=3
+    )
     file.setFormatter(formatter)
+
     logger.addHandler(console)
     logger.addHandler(file)
+
     return logger
+
 
 logger = setup_logger()
 
+# =========================
 # ROUTES
+# =========================
 @app.get("/", response_class=HTMLResponse)
 def dashboard(request: Request):
     return templates.TemplateResponse(
         "dashboard.html",
         {"request": request}
     )
-    
+
+
 @app.get("/test")
 def test():
     return {"ok": True}
+
 
 @app.post("/start")
 def start():
@@ -73,13 +89,17 @@ def start():
     start_live_system()
     return {"status": "running"}
 
+
 @app.post("/stop")
 def stop():
     logger.info("STOP ENDPOINT CALLED")
     stop_live_system()
     return {"status": "stopped"}
 
+
+# =========================
 # LIVE WEBSOCKET
+# =========================
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
 
@@ -88,19 +108,26 @@ async def websocket_endpoint(websocket: WebSocket):
 
     try:
         while True:
-            # TIME RUNTIME 
+
+            # =========================
+            # RUNTIME
+            # =========================
             start_time = live_state.get("start_time")
 
             if start_time:
-                runtime = format_runtime(start_time)
-                live_state["runtime"] = runtime
-            else:
-                runtime = "00:00:00"
+                live_state["runtime"] = format_runtime(start_time)
 
-            # READ STATE ONLY
+            runtime = live_state.get("runtime", "00:00:00")
+
+            # =========================
+            # STATE READ
+            # =========================
             debug = live_state.get("latest_debug", {})
             metrics = live_state.get("metrics", {})
-           
+
+            # =========================
+            # PAYLOAD
+            # =========================
             payload = {
 
                 # runtime
@@ -117,7 +144,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 # prices
                 "current_price": live_state.get("current_price", 0),
-                "entering_price": live_state.get("entry_price", 0),
+                "entry_price": live_state.get("entry_price", 0),
                 "exit_price": live_state.get("exit_price", 0),
 
                 # candles
@@ -126,27 +153,38 @@ async def websocket_endpoint(websocket: WebSocket):
                 # analytics
                 **metrics,
 
-                # debug
-                 # debug
+                # =========================
+                # DEBUG (RAW INDICATORS)
+                # =========================
                 "momentum": debug.get("momentum", 0),
+                "sma_pct": debug.get("sma_pct", 0),
                 "signal": debug.get("signal", "HOLD"),
 
-                # curves
+                # =========================
+                # CURVES
+                # =========================
                 "equity_curve": live_state.get("equity_curve", []),
                 "drawdown_curve": live_state.get("drawdown_curve", []),
 
-                # trades
+                # =========================
+                # TRADES
+                # =========================
                 "trades": live_state.get("trades", []),
             }
+
             await websocket.send_json(payload)
             await asyncio.sleep(1)
 
     except Exception as e:
         print("Dashboard disconnected:", e)
 
+
+# =========================
 # HEALTH CHECK
+# =========================
 @app.get("/health")
 def health():
     return get_system_status()
 
-# uvicorn web_app.system_app:app --port 8001
+
+#         uvicorn web_app.system_app:app --port 8001
