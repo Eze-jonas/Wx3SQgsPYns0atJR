@@ -124,6 +124,7 @@ socket.onmessage = function (event) {
     // =========================
     setText("momentum-value", data.momentum);
     setText("sma-pct-value", data.sma_pct);
+    setText("atr-pct-value", data.atr_pct);
     setText("signal-value", data.signal ?? "HOLD");
 
 

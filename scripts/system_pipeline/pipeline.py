@@ -9,6 +9,8 @@ from scripts.analytics.system_analytics import compute_metrics
 from scripts.logger_utils.dedicated_logger import log_state
 from scripts.state.state import live_state
 from scripts.features.indicators import add_sma
+from scripts.features.indicators import add_atr
+
 
 logger = logging.getLogger(__name__)
 
@@ -54,12 +56,13 @@ def process_candle(live_candle):
         # =========================
         momentum_df = momentum(hd_df)
         sma_df = add_sma(momentum_df)
+        atr_df = add_atr(sma_df)
         
 
         # =========================
         # SIGNAL GENERATION
         # =========================
-        clean_df = sma_df.dropna()
+        clean_df = atr_df.dropna()
 
         if clean_df.empty:
             return

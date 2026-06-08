@@ -25,6 +25,7 @@ def log_state(
     logger.info(f"Signal: {debug_data.get('signal', 'HOLD')}")
     logger.info(f"Momentum: {debug_data.get('momentum', None)}")
     logger.info(f"SMA %: {debug_data.get('sma_pct', None)}")
+    logger.info(f"ATR %: {debug_data.get('atr_pct', None)}")
 
     # =========================
     # LIVE DASHBOARD

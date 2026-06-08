@@ -17,6 +17,7 @@ def execute_trade(row):
     price = row.get("close")
     momentum = row.get("momentum")
     sma_pct = row.get("sma_pct")
+    atr_pct = row.get("atr_pct")
 
     if price is None or price == 0:
         return
@@ -35,11 +36,12 @@ def execute_trade(row):
     # LLM INPUT
     # =========================
     logger.info(
-        f"LLM INPUT | momentum={momentum} | sma_pct={sma_pct}")
+        f"LLM INPUT | momentum={momentum} | sma_pct={sma_pct} | atr_pct={atr_pct}")
 
     llm_result = llm.get_signal({
         "momentum": momentum,
-        "sma_pct": sma_pct
+        "sma_pct": sma_pct,
+        "atr_pct": atr_pct
     })
 
     signal = llm_result["signal"]
@@ -86,7 +88,8 @@ def execute_trade(row):
     update_debug(
         signal,
         momentum,
-        sma_pct
+        sma_pct,
+        atr_pct
     )
 
     # =========================
