@@ -26,6 +26,7 @@ def log_state(
     logger.info(f"Momentum: {debug_data.get('momentum', None)}")
     logger.info(f"SMA %: {debug_data.get('sma_pct', None)}")
     logger.info(f"ATR %: {debug_data.get('atr_pct', None)}")
+    logger.info(f"RSI %: {debug_data.get('rsi', None)}")
 
     # =========================
     # LIVE DASHBOARD

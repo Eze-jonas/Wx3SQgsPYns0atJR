@@ -22,6 +22,7 @@ live_state = {
         "signal": "HOLD",
         "momentum": 0.0,
         "sma_pct": 0.0,
-        "atr_pct": 0.0
+        "atr_pct": 0.0,
+        "rsi": 0.0
     }
 }

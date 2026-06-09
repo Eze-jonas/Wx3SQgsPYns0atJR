@@ -22,10 +22,21 @@ Indicators:
   Low ATR means low volatility (calm, stable market conditions).
   ATR does NOT indicate direction, only uncertainty and risk level.
 
+- RSI:
+  Relative Strength Index (RSI) measures the strength of recent price movements.
+  RSI values range from 0 to 100.
+
+  High RSI values suggest strong buying pressure and potentially overbought conditions.
+  Low RSI values suggest strong selling pressure and potentially oversold conditions.
+
+  RSI above 70 may indicate overbought conditions.
+  RSI below 30 may indicate oversold conditions.
+
 Rules:
 - Use all indicators together.
 - Momentum and SMA indicate direction.
 - ATR indicates risk and confidence in the signal.
+- RSI indicates the strength of recent buying or selling pressure.
 - Do not assume future price movement.
 - Base decision only on provided data.
 - Be consistent and risk-aware.
@@ -40,10 +51,9 @@ HOLD
 """
 
 
-
-
 user_prompt = """
 Momentum: {momentum}
 SMA Percentage: {sma_pct}
 ATR Percentage: {atr_pct}
+RSI: {rsi}
 """

@@ -31,3 +31,20 @@ def add_atr(sma_df, window=14):
     atr_df["atr_pct"] = (atr_df["atr"] / atr_df["close"]) * 100
 
     return atr_df
+
+def add_rsi(atr_df, window=14):
+    rsi_df = atr_df.copy()
+
+    delta = rsi_df["close"].diff()
+
+    gain = delta.clip(lower=0)
+    loss = -delta.clip(upper=0)
+
+    avg_gain = gain.rolling(window=window).mean()
+    avg_loss = loss.rolling(window=window).mean()
+
+    rs = avg_gain / avg_loss
+
+    rsi_df["rsi"] = 100 - (100 / (1 + rs))
+
+    return rsi_df

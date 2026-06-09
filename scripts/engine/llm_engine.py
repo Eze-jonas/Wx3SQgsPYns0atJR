@@ -28,10 +28,12 @@ class LLMWrapper:
         momentum = data.get("momentum", 0)
         sma_pct = data.get("sma_pct", 0)
         atr_pct = data.get("atr_pct", 0)
+        rsi = data.get("rsi", 0)
         print(
             f"MOMENTUM={momentum} | "
             f"SMA_PCT={sma_pct}"
             f"ATR_PCT={atr_pct}"
+             f"RSI={rsi}"
             )
 
         try:
@@ -40,6 +42,7 @@ class LLMWrapper:
                 "momentum": momentum,
                 "sma_pct": sma_pct,
                 "atr_pct": atr_pct,
+                "rsi": rsi,
             })
 
             signal = response.content.strip().upper()

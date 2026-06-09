@@ -159,6 +159,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 "momentum": debug.get("momentum", 0),
                 "sma_pct": debug.get("sma_pct", 0),
                 "atr_pct": debug.get("atr_pct", 0),
+                "rsi": debug.get("rsi", 0),
                 "signal": debug.get("signal", "HOLD"),
 
                 # =========================
