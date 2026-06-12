@@ -224,7 +224,6 @@
                         </h6>
 
 
-                        <!-- SCROLLING AREA -->
                         <div style="
                             max-height: 320px;
                             overflow-y: auto;
@@ -251,7 +250,6 @@
                                 </thead>
 
                                 <tbody id="trade-table-body">
-                                    <!-- JS FILLS -->
                                 </tbody>
 
                             </table>
@@ -264,13 +262,14 @@
 
 
 
-                <!-- DEBUG -->
+                <!-- DEBUG + RISK -->
                 <div style="flex: 1;">
 
                     <h6 class="text-info mb-2">
                         🛠 DEBUG
                     </h6>
 
+                    <!-- DEBUG TABLE -->
                     <table class="table table-dark table-sm table-bordered">
 
                         <tbody>
@@ -285,19 +284,54 @@
                                 <td id="sma-pct-value">0</td>
                             </tr>
 
-                             <tr>
-                                <td>ATR %</td>
-                                <td id="atr-pct-value">0</td>
-                            </tr>
-
                             <tr>
-                                <td>RSI </td>
+                                <td>RSI</td>
                                 <td id="rsi-value">0</td>
                             </tr>
 
                             <tr>
                                 <td>Signal</td>
                                 <td id="signal-value">HOLD</td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+
+
+                    <!-- 🔥 RISK MANAGEMENT TABLE -->
+                    <h6 class="text-warning mt-3 mb-2">
+                        🛡 Risk Management
+                    </h6>
+
+                    <table class="table table-dark table-sm table-bordered">
+
+                        <tbody>
+
+                            <tr>
+                                <td>Highest Price</td>
+                                <td id="highest-price">0</td>
+                            </tr>
+
+                            <tr>
+                                <td>ATR</td>
+                                <td id="atr-value">0</td>
+                            </tr>
+
+                            <tr>
+                                <td>2 × ATR</td>
+                                <td id="double-atr">0</td>
+                            </tr>
+
+                            <tr>
+                                <td>Stop Loss</td>
+                                <td id="stop-loss">0</td>
+                            </tr>
+
+                            <tr>
+                                <td>Risk Distance</td>
+                                <td id="risk-distance">0</td>
                             </tr>
 
                         </tbody>

@@ -124,9 +124,17 @@ socket.onmessage = function (event) {
     // =========================
     setText("momentum-value", data.momentum);
     setText("sma-pct-value", data.sma_pct);
-    setText("atr-pct-value", data.atr_pct);
     setText("rsi-value", data.rsi);
     setText("signal-value", data.signal ?? "HOLD");
+
+    // =========================
+    // RISK MANAGEMENT
+    // =========================
+    setText("highest-price", data.highest_price);
+    setText("atr-value", data.atr);
+    setText("double-atr", data.double_atr);
+    setText("stop-loss", data.stop_loss);
+    setText("risk-distanc", data.risk_distance);
 
 
     // =========================

@@ -158,9 +158,18 @@ async def websocket_endpoint(websocket: WebSocket):
                 # =========================
                 "momentum": debug.get("momentum", 0),
                 "sma_pct": debug.get("sma_pct", 0),
-                "atr_pct": debug.get("atr_pct", 0),
                 "rsi": debug.get("rsi", 0),
                 "signal": debug.get("signal", "HOLD"),
+
+                # =========================
+                # RISK MANAGEMENT
+                # =========================
+                "highest_price": debug.get("highest_price", 0),
+                "stop_loss": debug.get("stop_loss", 0),
+                "risk_distance": metrics.get("risk_distance", 0),
+
+                "atr": metrics.get("atr", 0),
+                "double_atr": metrics.get("double_atr", 0),
 
                 # =========================
                 # CURVES

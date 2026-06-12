@@ -14,6 +14,7 @@ live_state = {
 
     "highest_price": 0.0,
     "current_price": 0.0,
+    "stop_loss": 0.0,
 
     "runtime": "00:00:00",
     "last_llm_decision": "HOLD",
@@ -22,7 +23,6 @@ live_state = {
         "signal": "HOLD",
         "momentum": 0.0,
         "sma_pct": 0.0,
-        "atr_pct": 0.0,
         "rsi": 0.0
     }
 }

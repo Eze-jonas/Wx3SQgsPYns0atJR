@@ -5,12 +5,12 @@ def update_debug(
     action: str,
     momentum: float,
     sma_pct: float = 0.0,
-    atr_pct: float = 0.0,
     rsi: float = 0.0,
 ):
     """
     Updates live debug state for dashboard.
     """
+
     if action is None:
         action = "HOLD"
 
@@ -20,16 +20,29 @@ def update_debug(
     if sma_pct is None:
         sma_pct = 0.0
 
-    if atr_pct is None:
-        atr_pct = 0.0
-
     if rsi is None:
         rsi = 0.0
+
+    # =========================
+    # TRAILING STOP DEBUG (NEW)
+    # =========================
+    highest_price = live_state.get("highest_price", 0.0)
+    stop_loss = live_state.get("stop_loss", 0.0)
+
+    risk_distance = (
+        live_state.get("current_price", 0.0) - stop_loss
+        if stop_loss > 0
+        else 0.0
+    )
 
     live_state["latest_debug"] = {
         "signal": action,
         "momentum": float(momentum),
         "sma_pct": float(sma_pct),
-        "atr_pct": float(atr_pct),
         "rsi": float(rsi),
+
+        # NEW FIELDS
+        "highest_price": float(highest_price),
+        "stop_loss": float(stop_loss),
+        "risk_distance": float(risk_distance),
     }

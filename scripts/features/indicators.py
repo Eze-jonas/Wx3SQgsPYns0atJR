@@ -26,10 +26,7 @@ def add_atr(sma_df, window=14):
 
     # ATR
     atr_df["atr"] = atr_df["tr"].rolling(window=window).mean()
-
-    # ATR %
-    atr_df["atr_pct"] = (atr_df["atr"] / atr_df["close"]) * 100
-
+    
     return atr_df
 
 def add_rsi(atr_df, window=14):

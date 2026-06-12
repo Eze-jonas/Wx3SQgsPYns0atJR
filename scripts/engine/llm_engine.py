@@ -27,21 +27,19 @@ class LLMWrapper:
 
         momentum = data.get("momentum", 0)
         sma_pct = data.get("sma_pct", 0)
-        atr_pct = data.get("atr_pct", 0)
         rsi = data.get("rsi", 0)
+
         print(
             f"MOMENTUM={momentum} | "
-            f"SMA_PCT={sma_pct}"
-            f"ATR_PCT={atr_pct}"
-             f"RSI={rsi}"
-            )
+            f"SMA_PCT={sma_pct} | "
+            f"RSI={rsi}"
+        )
 
         try:
 
             response = self.chain.invoke({
                 "momentum": momentum,
                 "sma_pct": sma_pct,
-                "atr_pct": atr_pct,
                 "rsi": rsi,
             })
 
@@ -50,11 +48,7 @@ class LLMWrapper:
             print("\nFINAL SIGNAL:", signal)
             print("=" * 80)
 
-            if signal not in [
-                "BUY",
-                "SELL",
-                "HOLD"
-            ]:
+            if signal not in ["BUY", "SELL", "HOLD"]:
                 signal = "HOLD"
 
             return {

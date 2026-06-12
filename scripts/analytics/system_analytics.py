@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+
 def compute_metrics(live_state):
 
     # SAFE DEFAULTS
@@ -18,6 +19,25 @@ def compute_metrics(live_state):
     trades = live_state.get("trades", [])
     equity_curve = live_state.get("equity_curve", [])
 
+    # =========================
+    # RISK MANAGEMENT FIELDS
+    # =========================
+    highest_price = live_state.get("highest_price", 0.0)
+    stop_loss = live_state.get("stop_loss", 0.0)
+    atr = live_state.get("atr", 0.0)
+    
+
+    risk_distance = (
+        current_price - stop_loss
+        if stop_loss > 0
+        else 0.0
+    )
+    print(
+    f"DEBUG | current_price={current_price} | "
+    f"stop_loss={stop_loss} | "
+    f"risk_distance={risk_distance}"
+)
+
     portfolio_value = cash + (btc_holdings * current_price)
 
     # EARLY EXIT SAFETY
@@ -33,6 +53,13 @@ def compute_metrics(live_state):
             "candle_count": live_state.get("candle_count", 0),
             "portfolio_value": round(portfolio_value, 2),
 
+            # RISK METRICS (NEW)
+            "highest_price": highest_price,
+            "stop_loss": stop_loss,
+            "atr": atr,
+            "double_atr": atr * 2,
+            "risk_distance": risk_distance,
+
             "total_trades": 0,
             "wins": 0,
             "losses": 0,
@@ -46,27 +73,62 @@ def compute_metrics(live_state):
             "exposure": 0,
 
             "momentum": 0,
-            "action": "HOLD"
+            "signal": "HOLD"
         }
 
     trades_df = pd.DataFrame(trades)
 
-    sell_df = trades_df[trades_df["type"] == "SELL"].copy() if len(trades_df) else pd.DataFrame()
+    sell_df = (
+        trades_df[trades_df["type"] == "SELL"].copy()
+        if len(trades_df)
+        else pd.DataFrame()
+    )
 
     total_trades = len(sell_df)
 
-    wins = (sell_df.get("pnl", pd.Series()) > 0).sum() if "pnl" in sell_df.columns else 0
-    losses = (sell_df.get("pnl", pd.Series()) < 0).sum() if "pnl" in sell_df.columns else 0
+    wins = (
+        (sell_df.get("pnl", pd.Series()) > 0).sum()
+        if "pnl" in sell_df.columns
+        else 0
+    )
+
+    losses = (
+        (sell_df.get("pnl", pd.Series()) < 0).sum()
+        if "pnl" in sell_df.columns
+        else 0
+    )
 
     win_rate = wins / total_trades if total_trades > 0 else 0
 
-    expectancy = sell_df["pnl"].mean() if total_trades > 0 and "pnl" in sell_df.columns else 0
-    total_profit = sell_df["pnl"].sum() if "pnl" in sell_df.columns else 0
+    expectancy = (
+        sell_df["pnl"].mean()
+        if total_trades > 0 and "pnl" in sell_df.columns
+        else 0
+    )
 
-    gross_profit = sell_df.loc[sell_df["pnl"] > 0, "pnl"].sum() if "pnl" in sell_df.columns else 0
-    gross_loss = abs(sell_df.loc[sell_df["pnl"] < 0, "pnl"].sum()) if "pnl" in sell_df.columns else 0
+    total_profit = (
+        sell_df["pnl"].sum()
+        if "pnl" in sell_df.columns
+        else 0
+    )
 
-    profit_factor = gross_profit / gross_loss if gross_loss != 0 else 0
+    gross_profit = (
+        sell_df.loc[sell_df["pnl"] > 0, "pnl"].sum()
+        if "pnl" in sell_df.columns
+        else 0
+    )
+
+    gross_loss = (
+        abs(sell_df.loc[sell_df["pnl"] < 0, "pnl"].sum())
+        if "pnl" in sell_df.columns
+        else 0
+    )
+
+    profit_factor = (
+        gross_profit / gross_loss
+        if gross_loss != 0
+        else 0
+    )
 
     equity = pd.Series(equity_curve)
 
@@ -83,7 +145,11 @@ def compute_metrics(live_state):
     max_drawdown = drawdown.min() if len(drawdown) > 0 else 0
 
     exposure_history = live_state.get("exposure_history", [])
-    exposure = sum(exposure_history) / len(exposure_history) if exposure_history else 0
+    exposure = (
+        sum(exposure_history) / len(exposure_history)
+        if exposure_history
+        else 0
+    )
 
     start_value = equity.iloc[0]
     end_value = equity.iloc[-1]
@@ -107,6 +173,13 @@ def compute_metrics(live_state):
         "entry_price": round(entry_price, 2),
         "exit_price": round(exit_price, 2),
         "candle_count": live_state.get("candle_count", 0),
+
+        # RISK METRICS (NEW)
+        "highest_price": round(highest_price, 2),
+        "stop_loss": round(stop_loss, 2),
+        "atr": round(atr, 2),
+        "double_atr": round(atr * 2, 2),
+        "risk_distance": round(risk_distance, 2),
 
         "total_trades": total_trades,
         "wins": int(wins),
