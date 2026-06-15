@@ -28,6 +28,12 @@ def log_state(
     logger.info(f"RSI %: {debug_data.get('rsi', None)}")
 
     # =========================
+    # FEAR & GREED (NEW)
+    # =========================
+    logger.info(f"Fear & Greed: {debug_data.get('fear_greed', 50)}")
+    logger.info(f"Sentiment Label: {debug_data.get('fear_greed_label', 'Neutral')}")
+
+    # =========================
     # LIVE DASHBOARD
     # =========================
     logger.info("========== LIVE DASHBOARD ==========")

@@ -29,10 +29,18 @@ class LLMWrapper:
         sma_pct = data.get("sma_pct", 0)
         rsi = data.get("rsi", 0)
 
+        # =========================
+        # FEAR & GREED
+        # =========================
+        fear_greed = data.get("fear_greed", 50)
+        fear_greed_label = data.get("fear_greed_label", "Neutral")
+
         print(
             f"MOMENTUM={momentum} | "
             f"SMA_PCT={sma_pct} | "
-            f"RSI={rsi}"
+            f"RSI={rsi} | "
+            f"FG={fear_greed} | "
+            f"LABEL={fear_greed_label}"
         )
 
         try:
@@ -41,15 +49,36 @@ class LLMWrapper:
                 "momentum": momentum,
                 "sma_pct": sma_pct,
                 "rsi": rsi,
+
+                # =========================
+                # FEAR & GREED PASSED TO PROMPT
+                # =========================
+                "fear_greed": fear_greed,
+                "fear_greed_label": fear_greed_label,
             })
 
-            signal = response.content.strip().upper()
+            response_text = response.content.strip()
 
-            print("\nFINAL SIGNAL:", signal)
+            print("\nRAW LLM RESPONSE:")
+            print(response_text)
             print("=" * 80)
 
-            if signal not in ["BUY", "SELL", "HOLD"]:
+            response_upper = response_text.upper()
+
+            if "SIGNAL: BUY" in response_upper:
+                signal = "BUY"
+
+            elif "SIGNAL: SELL" in response_upper:
+                signal = "SELL"
+
+            elif "SIGNAL: HOLD" in response_upper:
                 signal = "HOLD"
+
+            else:
+                signal = "HOLD"
+
+            print("\nPARSED SIGNAL:", signal)
+            print("=" * 80)
 
             return {
                 "signal": signal

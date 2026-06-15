@@ -15,6 +15,8 @@ live_state = {
     "highest_price": 0.0,
     "current_price": 0.0,
     "stop_loss": 0.0,
+    "fear_greed": 50,
+    "fear_greed_label": "Neutral",
 
     "runtime": "00:00:00",
     "last_llm_decision": "HOLD",
@@ -23,6 +25,8 @@ live_state = {
         "signal": "HOLD",
         "momentum": 0.0,
         "sma_pct": 0.0,
-        "rsi": 0.0
+        "rsi": 0.0,
+        "fear_greed": 50,
+        "fear_greed_label": "Neutral"
     }
 }

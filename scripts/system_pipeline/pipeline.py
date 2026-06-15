@@ -11,6 +11,7 @@ from scripts.state.state import live_state
 from scripts.features.indicators import add_sma
 from scripts.features.indicators import add_atr
 from scripts.features.indicators import add_rsi
+from scripts.sentiment.fear_greed_cache import get_cached_fear_greed
 
 
 logger = logging.getLogger(__name__)
@@ -59,7 +60,6 @@ def process_candle(live_candle):
         sma_df = add_sma(momentum_df)
         atr_df = add_atr(sma_df)
         rsi_df = add_rsi(atr_df)
-        
 
         # =========================
         # SIGNAL GENERATION
@@ -70,7 +70,14 @@ def process_candle(live_candle):
             return
 
         latest_row = clean_df.iloc[-1]
-        
+
+        # =========================
+        # SENTIMENT UPDATE (FEAR & GREED)
+        # =========================
+        fg = get_cached_fear_greed()
+
+        live_state["fear_greed"] = fg["value"]
+        live_state["fear_greed_label"] = fg["label"]
 
         # =========================
         # EXECUTE TRADE
@@ -90,10 +97,6 @@ def process_candle(live_candle):
 
         # store metrics for dashboard reuse
         live_state["metrics"] = metrics
-
-        # =========================
-        # RUNTIME STRING (REMOVED FROM HERE)
-        # =========================
 
         # =========================
         # LOG SYSTEM STATE

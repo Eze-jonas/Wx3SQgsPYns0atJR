@@ -128,13 +128,20 @@ socket.onmessage = function (event) {
     setText("signal-value", data.signal ?? "HOLD");
 
     // =========================
+    // MARKET SENTIMENT
+    // =========================
+    setText("fear-greed", data.fear_greed);
+    setText("fear-greed-label", data.fear_greed_label);
+
+    // =========================
     // RISK MANAGEMENT
     // =========================
     setText("highest-price", data.highest_price);
     setText("atr-value", data.atr);
     setText("double-atr", data.double_atr);
+    setText("risk-current-price", data.current_price);
     setText("stop-loss", data.stop_loss);
-    setText("risk-distanc", data.risk_distance);
+    setText("risk-distance", data.risk_distance);
 
 
     // =========================

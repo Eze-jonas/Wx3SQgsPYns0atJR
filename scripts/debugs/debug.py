@@ -24,7 +24,7 @@ def update_debug(
         rsi = 0.0
 
     # =========================
-    # TRAILING STOP DEBUG (NEW)
+    # TRAILING STOP DEBUG
     # =========================
     highest_price = live_state.get("highest_price", 0.0)
     stop_loss = live_state.get("stop_loss", 0.0)
@@ -35,13 +35,29 @@ def update_debug(
         else 0.0
     )
 
+    # =========================
+    # FEAR & GREED DEBUG
+    # =========================
+    fear_greed = live_state.get("fear_greed", 50)
+    fear_greed_label = live_state.get(
+        "fear_greed_label",
+        "Neutral"
+    )
+
+    # =========================
+    # SAVE DEBUG STATE
+    # =========================
     live_state["latest_debug"] = {
         "signal": action,
         "momentum": float(momentum),
         "sma_pct": float(sma_pct),
         "rsi": float(rsi),
 
-        # NEW FIELDS
+        # FEAR & GREED
+        "fear_greed": int(fear_greed),
+        "fear_greed_label": fear_greed_label,
+
+        # RISK MANAGEMENT
         "highest_price": float(highest_price),
         "stop_loss": float(stop_loss),
         "risk_distance": float(risk_distance),

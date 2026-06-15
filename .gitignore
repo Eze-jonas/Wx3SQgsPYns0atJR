@@ -4,6 +4,7 @@ bot.log.1
 data/__pycache__/
 notebook/
 runner.py
+ test_fear_greed.py
 scripts/analytics/__pycache__/
 scripts/debugs/__pycache__/
 scripts/engine/__pycache__/

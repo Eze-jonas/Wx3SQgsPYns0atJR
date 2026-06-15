@@ -17,6 +17,8 @@ from scripts.engine.engine_controler import (
     get_system_status
 )
 
+from scripts.analytics.system_analytics import compute_metrics  
+
 # =========================
 # FASTAPI APP
 # =========================
@@ -123,64 +125,71 @@ async def websocket_endpoint(websocket: WebSocket):
             # STATE READ
             # =========================
             debug = live_state.get("latest_debug", {})
-            metrics = live_state.get("metrics", {})
+
+            # SINGLE SOURCE OF DERIVED TRUTH
+            metrics = compute_metrics(live_state)
 
             # =========================
             # PAYLOAD
             # =========================
             payload = {
 
-                # runtime
+                # RUNTIME
                 "runtime": runtime,
 
-                # capital
-                "start_capital": live_state.get("starting_capital", 0),
-                "invested": live_state.get("position_size", 0),
-
-                # balances
-                "cash": live_state.get("cash", 0),
-                "btc_holdings": live_state.get("btc_holdings", 0),
-                "portfolio_value": live_state.get("portfolio_value", 0),
-
-                # prices
+                # PRICE (SOURCE: live_state)
                 "current_price": live_state.get("current_price", 0),
                 "entry_price": live_state.get("entry_price", 0),
                 "exit_price": live_state.get("exit_price", 0),
 
-                # candles
-                "candle_processed": live_state.get("candle_count", 0),
+                # TRADING STATE (SOURCE: live_state)
+                "cash": live_state.get("cash", 0),
+                "btc_holdings": live_state.get("btc_holdings", 0),
+                "trades": live_state.get("trades", []),
 
-                # analytics
-                **metrics,
+                # PORTFOLIO
+                "portfolio_value": metrics.get("portfolio_value", 0),
 
-                # =========================
-                # DEBUG (RAW INDICATORS)
-                # =========================
+                # RISK (SOURCE: metrics.py)
+                "highest_price": metrics.get("highest_price", 0),
+                "stop_loss": metrics.get("stop_loss", 0),
+                "risk_distance": metrics.get("risk_distance", 0),
+                "atr": metrics.get("atr", 0),
+                "double_atr": metrics.get("double_atr", 0),
+
+                # PERFORMANCE (SOURCE: metrics.py)
+                # PORTFOLIO / PERFORMANCE
+                "start_capital": metrics.get("starting_capital", 0),
+                "invested": metrics.get("invested", 0),
+
+                "total_trades": metrics.get("total_trades", 0),
+                "wins": metrics.get("wins", 0),
+                "losses": metrics.get("losses", 0),
+
+                "win_rate": metrics.get("win_rate", 0),
+                "expectancy": metrics.get("expectancy", 0),
+                "total_profit": metrics.get("total_profit", 0),
+                "profit_factor": metrics.get("profit_factor", 0),
+
+                "cagr": metrics.get("cagr", 0),
+                "exposure": metrics.get("exposure", 0),
+                "sharpe_ratio": metrics.get("sharpe_ratio", 0),
+                "max_drawdown": metrics.get("max_drawdown", 0),
+
+                # INDICATORS (SOURCE: latest_debug)
                 "momentum": debug.get("momentum", 0),
                 "sma_pct": debug.get("sma_pct", 0),
                 "rsi": debug.get("rsi", 0),
                 "signal": debug.get("signal", "HOLD"),
 
-                # =========================
-                # RISK MANAGEMENT
-                # =========================
-                "highest_price": debug.get("highest_price", 0),
-                "stop_loss": debug.get("stop_loss", 0),
-                "risk_distance": metrics.get("risk_distance", 0),
+                # SENTIMENT (SOURCE: live_state)
+                "fear_greed": live_state.get("fear_greed", 50),
+                "fear_greed_label": live_state.get("fear_greed_label", "Neutral"),
 
-                "atr": metrics.get("atr", 0),
-                "double_atr": metrics.get("double_atr", 0),
-
-                # =========================
-                # CURVES
-                # =========================
+                # SYSTEM STATE
                 "equity_curve": live_state.get("equity_curve", []),
                 "drawdown_curve": live_state.get("drawdown_curve", []),
-
-                # =========================
-                # TRADES
-                # =========================
-                "trades": live_state.get("trades", []),
+                "candle_processed": live_state.get("candle_count", 0),
             }
 
             await websocket.send_json(payload)
