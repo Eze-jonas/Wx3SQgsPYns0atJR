@@ -15,3 +15,10 @@ scripts/state/__pycache__/
 scripts/strategy/__pycache__/
 scripts/system_pipeline/__pycache__/
 web_app/__pycache__/
+bt_agent.py
+btc_agent.py
+btc_agent2.py
+btc_agent_simple.py
+data/README.md
+data/report_skeleton.md
+test.py
