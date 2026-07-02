@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>BTC Bot Dashboard</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <script src="/static/js/dashboard.js?v=999"></script>
+
+</head>
+
+
+<body class="bg-dark text-white">
+
+
+    <!-- PAGE CONTAINER -->
+    <div class="container py-5">
+
+
+        <!-- TITLE -->
+        <h2 class="text-center mb-4">
+            🚀 BTC Trading Bot Dashboard
+        </h2>
+
+
+
+        <!-- CONTROL CARD -->
+        <div class="card bg-secondary text-white shadow p-1 mx-auto mb-4"
+             style="max-width: 320px; height: 45px;">
+
+            <div class="d-flex justify-content-center align-items-center gap-2 h-100">
+
+                <button id="startBtn" class="btn btn-success btn-sm">
+                    Start
+                </button>
+
+                <button id="stopBtn" class="btn btn-danger btn-sm">
+                    Stop
+                </button>
+
+                <span id="status" class="badge bg-warning text-dark p-2">
+                    Status: Idle
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- MAIN DASHBOARD CARD -->
+        <div class="card text-white shadow p-3 mx-auto"
+             style="max-width: 1200px;
+                    min-height: 500px;
+                    background-color: #2f3136;
+                    border: 2px solid #4da3ff;
+                    border-radius: 12px;">
+
+
+            <!-- RUN TIME -->
+            <div class="row mb-3">
+
+                <div class="col-md-2">
+
+                    <div class="card text-center shadow"
+                         style="background-color:#3a3a3a;
+                                border:1px solid #4da3ff;
+                                border-radius:5px;">
+
+                        <div class="card-body">
+
+                            <h6 class="text-info">RUN TIME</h6>
+
+                            <h3 id="runtime" class="text-white">
+                                00:00:00
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- MAIN CONTENT -->
+            <div class="d-flex gap-3 align-items-start">
+
+
+                <!-- LEFT SIDE -->
+                <div style="flex: 3;">
+
+
+                    <!-- METRICS -->
+                    <div style="
+                        background:#1a1a1a;
+                        border-radius:10px;
+                        padding:6px;
+                    ">
+
+                        <div class="text-center text-info mb-1">
+                            <strong>Metrics Performance</strong>
+                        </div>
+
+
+                        <!-- TABLE 1 -->
+                        <table class="table table-dark table-sm table-bordered text-center mb-0">
+
+                            <thead>
+                                <tr>
+                                    <th>Starting Capital</th>
+                                    <th>Invested</th>
+                                    <th>Cash</th>
+                                    <th>BTC Holdings</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td id="start-capital">10000</td>
+                                    <td id="invested">0</td>
+                                    <td id="cash">0</td>
+                                    <td id="btc-holdings">0</td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+
+
+                        <!-- TABLE 2 -->
+                        <table class="table table-dark table-sm table-bordered text-center mb-0">
+
+                            <thead>
+                                <tr>
+                                    <th>Current Price</th>
+                                    <th>Portfolio Value</th>
+                                    <th>Entry Price</th>
+                                    <th>Exit Price</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td id="current-price">0</td>
+                                    <td id="portfolio-value">0</td>
+                                    <td id="entering-price">0</td>
+                                    <td id="exit-price">0</td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+
+
+                        <!-- TABLE 3 -->
+                        <table class="table table-dark table-sm table-bordered text-center mb-0">
+
+                            <thead>
+                                <tr>
+                                    <th>Candles</th>
+                                    <th>Trades</th>
+                                    <th>Wins</th>
+                                    <th>Losses</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td id="candle-processed">0</td>
+                                    <td id="total-trades">0</td>
+                                    <td id="wins">0</td>
+                                    <td id="losses">0</td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+
+
+                        <!-- TABLE 4 -->
+                        <table class="table table-dark table-sm table-bordered text-center mb-0">
+
+                            <thead>
+                                <tr>
+                                    <th>Total Profit</th>
+                                    <th>Sharpe</th>
+                                    <th>Max DD</th>
+                                    <th>Expectancy</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td id="total-profit">0</td>
+                                    <td id="sharpe-ratio">0</td>
+                                    <td id="max-drawdown">0</td>
+                                    <td id="expectancy">0</td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+
+                    <!-- TRANSACTIONS PANEL -->
+                    <div class="mt-3"
+                         style="
+                            background:#111;
+                            border-radius:10px;
+                            padding:10px;
+                            border:1px solid #333;
+                         ">
+
+                        <h6 class="text-info mb-3">
+                            📊 Transactions
+                        </h6>
+
+
+                        <div style="
+                            max-height: 320px;
+                            overflow-y: auto;
+                            overflow-x: hidden;
+                        ">
+
+                            <table class="table table-dark table-sm table-bordered text-center mb-0">
+
+                                <thead style="
+                                    position: sticky;
+                                    top: 0;
+                                    background: #222;
+                                    z-index: 2;
+                                ">
+
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Price</th>
+                                        <th>Qty</th>
+                                        <th>PnL</th>
+                                        <th>Index</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="trade-table-body">
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- RIGHT SIDE: DEBUG + SENTIMENT + RISK -->
+                <div style="flex: 1;">
+
+
+                    <!-- =========================
+                         🛠 DEBUG
+                    ========================= -->
+                    <h6 class="text-info mb-2">
+                        🛠 DEBUG
+                    </h6>
+
+                    <table class="table table-dark table-sm table-bordered">
+
+                        <tbody>
+
+                            <tr>
+                                <td>Momentum</td>
+                                <td id="momentum-value">0</td>
+                            </tr>
+
+                            <tr>
+                                <td>SMA %</td>
+                                <td id="sma-pct-value">0</td>
+                            </tr>
+
+                            <tr>
+                                <td>RSI</td>
+                                <td id="rsi-value">0</td>
+                            </tr>
+
+                            <tr>
+                                <td>Signal</td>
+                                <td id="signal-value">HOLD</td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+
+
+                    <!-- =========================
+                         📈 MARKET SENTIMENT
+                    ========================= -->
+                    <h6 class="mt-3 mb-2" style="color:#39ff99;">
+                    📈 Market Sentiment
+                    </h6>
+
+                    <table class="table table-dark table-sm table-bordered">
+
+                        <tbody>
+
+                            <tr>
+                                <td>Fear & Greed Value</td>
+                                <td id="fear-greed">0</td>
+                            </tr>
+
+                            <tr>
+                                <td>Fear & Greed Label</td>
+                                <td id="fear-greed-label">Neutral</td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+
+
+                    <!-- =========================
+                         🛡 RISK MANAGEMENT
+                    ========================= -->
+                    <h6 class="text-warning mt-3 mb-2">
+                        🛡 Risk Management
+                    </h6>
+
+                    <table class="table table-dark table-sm table-bordered">
+
+                        <tbody>
+
+                            <tr>
+                                <td>Highest Price</td>
+                                <td id="highest-price">0</td>
+                            </tr>
+
+                            <tr>
+                                <td>ATR</td>
+                                <td id="atr-value">0</td>
+                            </tr>
+
+                            <tr>
+                                <td>2 × ATR</td>
+                                <td id="double-atr">0</td>
+                            </tr>
+
+                             <tr>
+                                <td>current Price</td>
+                                <td id="risk-current-price">0</td>
+                            </tr>
+
+
+
+                            <tr>
+                                <td>Stop Loss</td>
+                                <td id="stop-loss">0</td>
+                            </tr>
+
+                            <tr>
+                                <td>Risk Distance</td>
+                                <td id="risk-distance">0</td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- JS -->
+    <script src="/static/js/dashboard.js?v=2"></script>
+
+    <script>
+
+        window.addEventListener("DOMContentLoaded", () => {
+
+            document.getElementById("startBtn")
+                .addEventListener("click", startBot);
+
+            document.getElementById("stopBtn")
+                .addEventListener("click", stopBot);
+
+        });
+
+    </script>
+
+</body>
+
+</html>
