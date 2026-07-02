@@ -11,17 +11,7 @@ This project presents the design, implementation, and evaluation of a complete B
 The objective was to investigate the effectiveness of traditional rule-based trading strategies and compare them with an emerging **LLM-driven trading approach** using **Ollama's Llama 3.1**.
 
 The system integrates quantitative technical indicators, automated portfolio management, live market streaming, and an interactive web dashboard to provide an end-to-end cryptocurrency trading environment.
-
 ---
-
-# 📷 Live Dashboard
-
-![BTC Trading Dashboard](images/live_dashboard.png)
-
-*Figure 1. FastAPI dashboard displaying portfolio metrics, transaction history, market indicators, equity curve, and trading performance.*
-
----
-
 # ✨ Features
 
 * Historical BTC data processing from Binance
